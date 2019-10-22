@@ -113,8 +113,16 @@ function markdownpdf (opts) {
           opts.renderDelay,
           opts.loadTimeout
         ]
-
-        childProcess.execFile(opts.phantomPath, childArgs, function (err, stdout, stderr) {
+        
+        const procOptions = {
+          env: {
+            ...process.env,
+            // fix for debian buster (phantomjs doesn't work with new ssl thingies)
+            // see https://github.com/grafana/grafana/pull/18162/files#diff-3d553362b377027c6be7867e68a4a75cR81
+            OPENSSL_CONF: '/etc/ssl',
+          }
+        }
+        childProcess.execFile(opts.phantomPath, childArgs, procOptions, function (err, stdout, stderr) {
           // if (stdout) console.log(stdout)
           // if (stderr) console.error(stderr)
           if (err) return outputStream.emit('error', err)
